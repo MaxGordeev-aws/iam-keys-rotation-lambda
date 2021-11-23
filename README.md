@@ -71,7 +71,7 @@ It’s important for us to get a clear picture of what we’re trying to achieve
         - Access Secrets Manager Secret
         - Access IAM service to manage user access key. 
 
-     ```
+```
       {
     "Version":"2012-10-17",
     "Statement": [
@@ -107,10 +107,11 @@ It’s important for us to get a clear picture of what we’re trying to achieve
       }
     ]
 }
-     ```   
+```
+
     9.  Create IAM Policy to grant IAM User permissions to access secrets manager secret that stores AWS Access Key and Secret   Access Key. 
 
-    ```
+```
     {
     "Version":"2012-10-17",
     "Statement": [
@@ -135,6 +136,7 @@ It’s important for us to get a clear picture of what we’re trying to achieve
       }
    ]
 }
+
 ```
     
     10. Revisit IAM user and attach the new policy created in step 9.
@@ -142,7 +144,7 @@ It’s important for us to get a clear picture of what we’re trying to achieve
     12. Attach AWS Managed IAM Policy “AWSLambdaBasicExecutionRole” to IAM lambda role.
     13. Revisit Sthe secrets manager secret in step 3 and add the following policy to “Resource Permissions”
 
-    ```
+```
     {
   "Version" : "2012-10-17",
   "Statement" : [ {
