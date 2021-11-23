@@ -108,5 +108,65 @@ It’s important for us to get a clear picture of what we’re trying to achieve
     ]
 }
      ```   
+    9.  Create IAM Policy to grant IAM User permissions to access secrets manager secret that stores AWS Access Key and Secret   Access Key. 
+
+    ```
+    {
+    "Version":"2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow"
+        "Action": [
+           <list of actions the API access should grant>
+        ],
+        "Resource": [
+           "<the resources access should be granted to>"
+        ],
+      },
+      {
+        "Effect": "Allow"
+        "Action": [
+          "secretsmanager:GetSecretValue"
+        ],
+        "Resource": "<secrets manager secret arn>"
+        "Principal": {
+          "AWS": "<iam role arn>"
+        }         
+      }
+   ]
+}
+```
+    
+    10. Revisit IAM user and attach the new policy created in step 9.
+    11. Revisit IAM Lambda role and attach the new policy created in step 8.
+    12. Attach AWS Managed IAM Policy “AWSLambdaBasicExecutionRole” to IAM lambda role.
+    13. Revisit Sthe secrets manager secret in step 3 and add the following policy to “Resource Permissions”
+
+    ```
+    {
+  "Version" : "2012-10-17",
+  "Statement" : [ {
+    "Sid" : "AllowLambdaFunctionReadWriteAccess",
+    "Effect" : "Allow",
+    "Principal" : {
+      "AWS" : "<lambda iam role>"
+    },
+    "Action" : [ "secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue" ],
+    "Resource" : "<the arn of the secret>"
+  }, {
+    "Sid" : "AllowIAMUserReadAccess",
+    "Effect" : "Allow",
+    "Principal" : {
+      "AWS" : "<the arn of the iam user>"
+    },
+    "Action" : "secretsmanager:GetSecretValue",
+    "Resource" : "<the arn of the secret>"
+  } ]
+}
+
+```
 
 
+# Conclusion
+
+    By using event bridge rules, we can set schedules to trigger the lambda function and pass the event data needed to process key rotation. In our design, we provide the developers with 14 days to rotate their keys and provide an additional 14 days of grace period before deleting the keys permanently. The notification is provided to the software developers via SNS topic and subscribing them to those topics. We use secrets manager to store the secret key and secret access key information; Since secrets manager maintain versions of secret, the lambda function can leverage this to match the last issued access key Id in order to deactivate it during key rotation. IAM user and policy is setup to grant the user access to the access key secret as well as permissions that the software developers needed. IAM role and policy is created to allow the lambda to execute via AWSLambdaBasicExecutionRole managed policy and attaching inline or custom policy to grant access to the access key secret as well as SNS topic to publish notifications to software developers during key rotation and key deactivation.
